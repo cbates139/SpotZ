@@ -19,7 +19,7 @@ TASK LIST
   
   Maze
       Holes
-        Item creation
+        Item creation                                   //finished
         Holes interaction with spot (life lost)
         Random spawning
         Multiple Spawns
