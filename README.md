@@ -1,2 +1,0 @@
-# SpotZ
-FOP work
