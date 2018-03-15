@@ -6,13 +6,13 @@ TASK LIST
       Lives
   
   Pill
-      Item creation
-      Random Starting position
-      Interaction with spot
-      multiple spawns
+      Item creation                                     //finished
+      Random Starting position                          //finished
+      Interaction with spot                             //in progress (callum)
+      multiple spawns                                   //in progress (callum)
   
   Zombie
-      Item creation
+      Item creation                                     //finished
       4 corners starting location
       Interaction with spot
       4 zombie total
