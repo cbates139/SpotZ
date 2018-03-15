@@ -46,7 +46,7 @@ const int  LEFT(75);		//left arrow
 const char QUIT('Q');		//to end the game
 
 struct Item {
-	int x, y;
+	int x, y, lives;
 	char symbol;
 };
 
@@ -71,10 +71,10 @@ int main()
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];			//grid for display
 	char maze[SIZEY][SIZEX];			//structure of the maze
-	Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
-	Item pill = { 0, 0, PILL };			//pill's position and symbol
-	Item zombie = { 0, 0, ZOMBIE };		//zombie's position and symbol
-	Item hole = { 0, 0, HOLE };			//Holes position and symbol
+	Item spot = { 0, 0, 5, SPOT }; 		//spot's position and symbol
+	Item pill = { 0, 0, 1, PILL };			//pill's position and symbol
+	Item zombie = { 0, 0, 1, ZOMBIE };		//zombie's position and symbol
+	Item hole = { 0, 0, 1000, HOLE };			//Holes position and symbol
 	string message("LET'S START...");	//current message to player
 
 	//action...
@@ -210,7 +210,7 @@ void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 		for (int col(0); col < SIZEX; ++col)
 			grid[row][col] = maze[row][col];
 }
-//TODO: Add zombiees, pills and holes
+
 void placeItem(char g[][SIZEX], const Item spot, const Item pill, const Item zombie, const Item hole)
 { //place spot on board
 	g[spot.y][spot.x] = spot.symbol;
@@ -250,9 +250,12 @@ void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& me
 		spot.x += dx;	//go in that X direction
 		break;
 	case WALL:  		//hit a wall and stay there
-
-
 		mess = "CANNOT GO THERE!";
+		break;
+	case PILL:
+		spot.lives += 1;
+		spot.y += dy;
+		spot.x += dx;
 		break;
 	}
 }
