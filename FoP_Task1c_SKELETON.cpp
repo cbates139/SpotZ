@@ -57,13 +57,13 @@ int main()
 {
 	//function declarations (prototypes)
 	
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& spot);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& spot, Item& pill);
 	void paintGame(const char g[][SIZEX], string mess);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
 	void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& mess);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item spot);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item spot, const Item pill);
 	void endProgram();
 	
 	//local variable declarations 
@@ -80,7 +80,7 @@ int main()
 	
 	//set this to be called in another function"initialiseEntryScreen" which displays the message and asks the user for their name
 	//
-	initialiseGame(grid, maze, spot);	//initialise grid (incl. walls and spot) 
+	initialiseGame(grid, maze, spot, pill);	//initialise grid (incl. walls and spot) 
 	//
 	//
 	paintGame(grid, message);			//display game info, modified grid and messages
@@ -91,7 +91,7 @@ int main()
 		if ((isArrowKey(key)) || (wantsToQuit(key)))
 		{
 			updateGameData(grid, spot, key, message);		//move spot in that direction
-			updateGrid(grid, maze, spot);					//update grid information
+			updateGrid(grid, maze, spot, pill);					//update grid information
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
@@ -111,15 +111,15 @@ void initialiseEntryScreen()
 	
 }
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot, Item& pill)
 { //initialise grid and place spot in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setItemInitialCoordinates(Item& spot);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b);
+	void setItemInitialCoordinates(Item& spot, Item& pill);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b, Item pill);
 
 	setInitialMazeStructure(maze);		//initialise maze
-	setItemInitialCoordinates(spot);	//spot initial coordinates
-	updateGrid(grid, maze, spot);		//prepare grid
+	setItemInitialCoordinates(spot, pill);	//spot initial coordinates
+	updateGrid(grid, maze, spot, pill);		//prepare grid
 }
 
 void setItemInitialCoordinates(Item& spot, Item& pill)
@@ -177,13 +177,13 @@ void setInitialMazeStructure(char maze[][SIZEX])
 //---------------------------------------------------------------------------
 
 //TODO: Powerpill and spot interaction, zombies movement
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item spot)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item spot, const Item pill)
 { //update grid configuration after each move
 	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
-	void placeItem(char g[][SIZEX], const Item spot);
+	void placeItem(char g[][SIZEX], const Item spot, const Item pill);
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
-	placeItem(grid, spot);	//set spot in grid
+	placeItem(grid, spot, pill);	//set spot in grid
 }
 
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
@@ -193,9 +193,10 @@ void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 			grid[row][col] = maze[row][col];
 }
 //TODO: Add zombiees, pills and holes
-void placeItem(char g[][SIZEX], const Item item)
+void placeItem(char g[][SIZEX], const Item spot, const Item pill)
 { //place item at its new position in grid
-	g[item.y][item.x] = item.symbol;
+	g[spot.y][spot.x] = spot.symbol;
+	g[pill.y][pill.x] = pill.symbol;
 }
 
 //---------------------------------------------------------------------------
