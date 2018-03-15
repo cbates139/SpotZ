@@ -36,6 +36,7 @@ const char TUNNEL(' ');    	//tunnel
 const char WALL('#');    	//border
 const char PILL('*');		//pill
 const char ZOMBIE('Z');		//zombie
+const char HOLE('0');		//hole
 //defining the command letters to move the spot on the maze
 const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
@@ -57,13 +58,14 @@ int main()
 {
 	//function declarations (prototypes)
 	
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& spot, Item& pill);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& spot, Item& pill, Item& zombie, Item& hole);
 	void paintGame(const char g[][SIZEX], string mess);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
+	//TODO: update spot/pill interaction and spot/zombie interaction and spot/hole interaction
 	void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& mess);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item spot, const Item pill);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item spot, const Item pill, const Item zombie, const Item hole);
 	void endProgram();
 	
 	//local variable declarations 
@@ -72,6 +74,7 @@ int main()
 	Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item pill = { 0, 0, PILL };			//pill's position and symbol
 	Item zombie = { 0, 0, ZOMBIE };		//zombie's position and symbol
+	Item hole = { 0, 0, HOLE };			//Holes position and symbol
 	string message("LET'S START...");	//current message to player
 
 	//action...
@@ -80,7 +83,7 @@ int main()
 	
 	//set this to be called in another function"initialiseEntryScreen" which displays the message and asks the user for their name
 	//
-	initialiseGame(grid, maze, spot, pill);	//initialise grid (incl. walls and spot) 
+	initialiseGame(grid, maze, spot, pill, zombie, hole);	//initialise grid (incl. walls and spot) 
 	//
 	//
 	paintGame(grid, message);			//display game info, modified grid and messages
@@ -91,7 +94,7 @@ int main()
 		if ((isArrowKey(key)) || (wantsToQuit(key)))
 		{
 			updateGameData(grid, spot, key, message);		//move spot in that direction
-			updateGrid(grid, maze, spot, pill);					//update grid information
+			updateGrid(grid, maze, spot, pill, zombie, hole);					//update grid information
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
@@ -111,28 +114,43 @@ void initialiseEntryScreen()
 	
 }
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot, Item& pill)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot, Item& pill, Item& zombie, Item& hole)
 { //initialise grid and place spot in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setItemInitialCoordinates(Item& spot, Item& pill);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b, Item pill);
+	void setItemInitialCoordinates(Item& spot, Item& pill, Item& zombie, Item& hole);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b, Item pill, Item zombie, Item hole);
 
 	setInitialMazeStructure(maze);		//initialise maze
-	setItemInitialCoordinates(spot, pill);	//spot initial coordinates
-	updateGrid(grid, maze, spot, pill);		//prepare grid
+	setItemInitialCoordinates(spot, pill, zombie, hole);	//spot initial coordinates
+	updateGrid(grid, maze, spot, pill, zombie, hole);		//prepare grid
 }
 
-void setItemInitialCoordinates(Item& spot, Item& pill)
+void setItemInitialCoordinates(Item& spot, Item& pill, Item& zombie, Item& hole)
 { //set spot coordinates inside the grid at random at beginning of game
-//TODO: Spot should not spwan on inner walls
+
+	//SPOT SPAWN
 	spot.y = Random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
 	spot.x = Random(SIZEX - 2);      //horizontal coordinate in range [1..(SIZEX - 2)]
-
+	//PILL SPAWN
 	pill.y = Random(SIZEY - 2);
 	pill.x = Random(SIZEX - 2);
 	if (pill.y == spot.y)
 	{
 		pill.y = Random(SIZEY - 2);
+	}
+	//ZOMBIE SPAWN
+	zombie.y = Random(SIZEY - 2);
+	zombie.x = Random(SIZEX - 2);
+	if ((zombie.y == spot.y) || (zombie.y == pill.y))
+	{
+		zombie.y = Random(SIZEY - 2);
+	}
+	//HOLE SPAWN
+	hole.y = Random(SIZEY - 2);
+	hole.x = Random(SIZEX - 2);
+	if ((hole.y == spot.y) || (hole.y == pill.y) || (hole.y == zombie.y))
+	{
+		hole.y = Random(SIZEY - 2);
 	}
 } 
 
@@ -177,13 +195,13 @@ void setInitialMazeStructure(char maze[][SIZEX])
 //---------------------------------------------------------------------------
 
 //TODO: Powerpill and spot interaction, zombies movement
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item spot, const Item pill)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item spot, const Item pill, const Item zombie, const Item hole)
 { //update grid configuration after each move
 	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
-	void placeItem(char g[][SIZEX], const Item spot, const Item pill);
+	void placeItem(char g[][SIZEX], const Item spot, const Item pill, const Item zombie, const Item hole);
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
-	placeItem(grid, spot, pill);	//set spot in grid
+	placeItem(grid, spot, pill, zombie, hole);	//set spot in grid
 }
 
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
@@ -193,10 +211,19 @@ void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 			grid[row][col] = maze[row][col];
 }
 //TODO: Add zombiees, pills and holes
-void placeItem(char g[][SIZEX], const Item spot, const Item pill)
-{ //place item at its new position in grid
+void placeItem(char g[][SIZEX], const Item spot, const Item pill, const Item zombie, const Item hole)
+{ //place spot on board
 	g[spot.y][spot.x] = spot.symbol;
-	g[pill.y][pill.x] = pill.symbol;
+	//place pill on board
+	for ( int i = 0; i < 5; ++i)
+	{
+		g[pill.y][pill.x] = pill.symbol;
+	}
+	//Places zombie on board
+	g[zombie.y][zombie.x] = zombie.symbol;
+	//Place hole on board
+	g[hole.y][hole.x] = hole.symbol;
+
 }
 
 //---------------------------------------------------------------------------
